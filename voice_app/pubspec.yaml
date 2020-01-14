@@ -27,6 +27,8 @@ dependencies:
   speech_recognition: ^0.3.0+1
   qrscan: ^0.2.17
   clipboard_manager: ^0.0.1
+  mongo_dart: ^0.4.0
+  pin_entry_text_field: ^0.1.4
 
 dev_dependencies:
   flutter_test:

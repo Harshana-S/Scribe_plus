@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:speech_recognition/speech_recognition.dart';
+import 'package:voice_app/GeneralDisplayReportTab.dart';
 
 class NewPrescriptionTab extends StatefulWidget {
   @override
@@ -57,6 +58,15 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          RaisedButton(
+            color: Colors.green,
+            child: Text("Reset", style: TextStyle(color: Colors.white),),
+            onPressed: (){
+              setState(() {
+                _displayText=false;
+              });
+            },
+          ),
           Container(
             child: Column(
               children: <Widget>[
@@ -143,7 +153,10 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
               ),),
               color: Colors.green[300],
               onPressed: (){
-                print("Generate Report");
+                Navigator.push(context, 
+                MaterialPageRoute(
+                  builder:(context)=>GeneralDisplayReportTab())
+                );
               },
             )
             ],
