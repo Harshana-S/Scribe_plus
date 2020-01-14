@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:voice_app/AddPrescriptionTab.dart';
+import 'package:voice_app/NewPrescriptionTab.dart';
 import 'package:voice_app/ScanQRTab.dart';
 import 'package:voice_app/SearchPatientsTab.dart';
 
@@ -40,7 +40,7 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
   TabController _tabController;
   int currentTabIndex=0;
   List<Widget> tabs=[
-    AddPrescriptionTab(),
+    NewPrescriptionTab(),
     SearchPatientsTab(),
     ScanQRTab()
   ];

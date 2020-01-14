@@ -41,6 +41,20 @@ class _AddPrescriptionTab extends State<AddPrescriptionTab>{
         .then((res) => setState(() => _isAvailable = res));
 }
 @override
+void dispose(){
+  super.dispose();
+  if (_isListening) _cancelRecognitionHandler();
+}
+
+Future _cancelRecognitionHandler() async{
+  final res = await _speechRecognition.cancel();
+
+    setState(() {
+      resultText = '';
+      _isListening = res;
+    });
+}
+@override
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: new AppBar(
