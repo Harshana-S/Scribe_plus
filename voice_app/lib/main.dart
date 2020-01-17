@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:voice_app/HomeTab.dart';
+import 'package:voice_app/DoctorLoginPage.dart';
 
 void main() => runApp(SplashTab());
 
@@ -18,20 +18,22 @@ class SplashTab extends StatelessWidget {
 }
 
 class LoginTab extends StatefulWidget {
-
+ 
   _LoginTabState createState() => _LoginTabState();
   
 }
 
 class _LoginTabState extends State<LoginTab> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   startTime() async {
     var _duration = new Duration(seconds: 2);
     return new Timer(_duration, navigationPage);
   }
   void navigationPage() { //landing screen replace with splash screen.
-    Navigator.pushReplacement(context, MaterialPageRoute(
-        builder:(context) => HomeTab(),
-    ));
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+        builder:(context) => DoctorLoginPage(),
+    ),
+  (Route<dynamic> route) => false,);
   }
 
   @override
@@ -42,6 +44,7 @@ class _LoginTabState extends State<LoginTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         color: Colors.white,
         width: MediaQuery.of(context).size.width,

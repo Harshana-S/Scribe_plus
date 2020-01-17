@@ -27,7 +27,8 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
   void initSpeechRecognizer(){
     
     _speechRecognition= SpeechRecognition();
-    _speechRecognition.setAvailabilityHandler((bool result)
+    try{
+      _speechRecognition.setAvailabilityHandler((bool result)
     => setState(() => _isAvailable = result));
 
     _speechRecognition.setRecognitionStartedHandler(()
@@ -42,9 +43,15 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
     _speechRecognition.setRecognitionCompleteHandler(()
     => setState(() => _isListening = false));
     
+    
     _speechRecognition//1st Launch- asking the user for audio permissions.
         .activate()
         .then((res) => setState(() => _isAvailable = res));
+    
+    }on Exception catch(e){
+      print(e.toString());
+    }
+    
   }
   @override
   Widget build(BuildContext context) {
@@ -109,18 +116,24 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
                 child: Icon(Icons.stop),
                 backgroundColor:Colors.blueGrey,
                 onPressed: (){
-                  if(_isListening){
+                  try{
+                    if(_isListening){
                     _speechRecognition.stop().then((result)=> setState((){
                       _isListening = result;
                     }));
                   }
+                  } on Exception catch(e){
+                    print(e.toString());
+                  }
+                  
                 },
                 ):
                 FloatingActionButton(
                   child: Icon(Icons.mic),
                   backgroundColor: Colors.blueGrey,
                   onPressed: (){
-                    if(_isAvailable && !_isListening){
+                    try{
+                      if(_isAvailable && !_isListening){
                       _speechRecognition.listen(locale: "en_IN").then((result){
                         print(result);
                       setState(() {
@@ -129,7 +142,11 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
                         transcriptionController.text=transcriptionText;
                       });
                     });
-                  }}),
+                  }
+                    } on Exception catch(e){
+                      print(e.toString());
+                    }
+                    }),
               ],
             ),
           ),
@@ -161,7 +178,7 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
             )
             ],
           )
-        ) : SizedBox(width: 10.0,)
+        ) : SizedBox(width: 2.0,)
         
         ],
       ),

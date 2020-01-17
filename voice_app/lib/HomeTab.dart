@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:voice_app/DoctorLoginPage.dart';
 import 'package:voice_app/NewPrescriptionTab.dart';
 import 'package:voice_app/ScanQRTab.dart';
 import 'package:voice_app/SearchPatientsTab.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:voice_app/main.dart';
 
 
 
@@ -37,6 +40,7 @@ class VoiceHome extends StatefulWidget {
 }
 
 class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMixin{
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController _tabController;
   int currentTabIndex=0;
   List<Widget> tabs=[
@@ -60,8 +64,15 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
     _tabController.dispose();
     super.dispose();
   }
+  Future _logout() async{
+    SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+    //sharedPreferences.remove("address");
+    print(sharedPreferences.getString("address"));
+
+  }
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text("Voice Prescription"),
         centerTitle: true,
@@ -116,6 +127,15 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
             new ListTile(
               title: new Text("Log out"),
               trailing: new Icon(Icons.exit_to_app),
+              onTap: (){
+                _logout();
+                print("log out tapped");
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                  builder: (context)=>DoctorLoginPage()
+                ),
+  (Route<dynamic> route) => false,);
+
+              },
             )
           ],
         ),

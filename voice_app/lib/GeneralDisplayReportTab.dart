@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart' as localAuth;
 
 class GeneralDisplayReportTab extends StatefulWidget {
   _GeneralDisplayReportTabState createState() => _GeneralDisplayReportTabState();
@@ -8,6 +9,44 @@ class GeneralDisplayReportTab extends StatefulWidget {
 class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
   TextEditingController nameController, ageController, symptomsController, diagnosisController, prescriptionController, remarksController, phoneNumberController, emailController;
   String _name, _age, _symptoms, _diagnosis, _prescription, _remarks;
+
+  localAuth.LocalAuthentication localAuthentication=localAuth.LocalAuthentication();
+  bool hasFingerPrint=false;
+  bool notAuthenticatedFingerprint=true;
+
+  Future<bool> checkBiometrics() async{
+    
+    try{
+      bool canCheckBiometrics = await localAuthentication.canCheckBiometrics;
+      return canCheckBiometrics;
+      
+    } on Exception catch(e){
+      print(e.toString());
+      
+    }
+    return false;
+    
+  }
+  
+  Future<void> _authenticate() async{
+    bool authenticated=false;
+    try{
+      authenticated= await localAuthentication.authenticateWithBiometrics(
+        localizedReason: "Authenticate to send report",
+        stickyAuth: true,
+      );
+    } on PlatformException catch(e){
+      print(e.message);
+    }
+    if(!mounted) return;
+    setState(() {
+      notAuthenticatedFingerprint=authenticated?false:true;
+    });
+  }
+
+  
+
+
   @override
   void initState() {
     super.initState();
@@ -19,6 +58,26 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
     diagnosisController.text=_diagnosis;
     prescriptionController.text=_prescription;
     remarksController.text=_remarks;
+    print("object");
+    checkBiometrics().then((bool result){
+      setState(() {
+        hasFingerPrint=result;
+        print(this.hasFingerPrint);
+      });
+      
+    });
+    
+  
+    // .then((bool result){
+
+    //   print(result);
+    //   // this.setState(
+    //   //   hasFingerPrint=result;
+    //   // );
+      
+    
+      
+    // });
   } 
   void initialiseFromJSON(){
     _name="Name";
@@ -115,8 +174,6 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                     border: OutlineInputBorder())
                   ),
                 ),
-                
-                
               ],
             ),
             )
@@ -239,6 +296,36 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.01,
             ),
+            hasFingerPrint?
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                notAuthenticatedFingerprint?
+                FlatButton.icon(
+                  icon: Icon(Icons.fingerprint,color:Colors.blueGrey,size:35.0),
+                  label: Text("Authenticate"),
+                  onPressed: _authenticate,
+                ):
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                  FlatButton.icon(
+                  icon: Icon(Icons.fingerprint,color:Colors.green,size:35.0),
+                  label: Text("Authenticated"),
+                  onPressed: null,
+                ),
+                RaisedButton(
+                  color: Colors.green,
+                  child: Text("Send",style:TextStyle(color: Colors.white)),
+                  onPressed:()=> print("object"),
+                )
+
+                  ],
+                )
+                
+
+              ],
+            ):
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

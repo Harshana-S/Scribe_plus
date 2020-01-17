@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pin_entry_text_field/pin_entry_text_field.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
-import 'package:clipboard_manager/clipboard_manager.dart';
 import 'package:voice_app/DisplayPatientPage.dart';
 
 class ScanQRTab extends StatefulWidget {
@@ -12,11 +11,13 @@ class ScanQRTab extends StatefulWidget {
 }
 
 class _ScanQRTab extends State<ScanQRTab> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   
   String barcode = '';
   Uint8List bytes = Uint8List(200);
   bool _ownPatient= true;
   String otp='';
+  bool _resultOTP=true;
  
   Future _scan() async {
     String barcode = await scanner.scan();
@@ -26,10 +27,10 @@ class _ScanQRTab extends State<ScanQRTab> {
     } );
   }
 
-  Future _scanPhoto() async {
-    String barcode = await scanner.scanPhoto();
-    setState(() => this.barcode = barcode);
-  }
+  // Future _scanPhoto() async {
+  //   String barcode = await scanner.scanPhoto();
+  //   setState(() => this.barcode = barcode);
+  // }
     
   @override
   void initState() {
@@ -72,7 +73,20 @@ class _ScanQRTab extends State<ScanQRTab> {
               child: Text("Submit"),
               onPressed: (){
                 print("OK is pressed:"+otp);//Send otp as JSON
-                Navigator.of(context).pop();
+                setState(() {
+                  _resultOTP=true;//Write a function to send the otp and returns boolean
+                });                
+                if(_resultOTP){
+                  Navigator.of(context).pop();
+                  Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage()));
+                }
+                else{
+                  final snackBar = SnackBar(content: Text('Invalid OTP'));
+                  _scaffoldKey.currentState.showSnackBar(snackBar);
+                  Navigator.of(context).pop();
+                  
+                }
+                
               },
             ),
             new FlatButton(
@@ -95,6 +109,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text("Scan QR Code",
         style: TextStyle(
@@ -135,8 +150,10 @@ class _ScanQRTab extends State<ScanQRTab> {
               color: Colors.green,
               child: Text("Get Patient Authorization",style:TextStyle(color: Colors.white)),
               onPressed:()=> showOTPDialog(),
-            )
+            ),
+        
         ],
+        
         
         ),
             
