@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pin_entry_text_field/pin_entry_text_field.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:voice_app/DisplayPatientPage.dart';
+import 'package:http/http.dart' as http;
 
 class ScanQRTab extends StatefulWidget {
 
@@ -12,12 +14,14 @@ class ScanQRTab extends StatefulWidget {
 
 class _ScanQRTab extends State<ScanQRTab> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+
   
   String barcode = '';
   Uint8List bytes = Uint8List(200);
   bool _ownPatient= true;
   String otp='';
-  bool _resultOTP=true;
+  String _resultOTP;
  
   Future _scan() async {
     String barcode = await scanner.scan();
@@ -27,17 +31,30 @@ class _ScanQRTab extends State<ScanQRTab> {
     } );
   }
 
-  // Future _scanPhoto() async {
-  //   String barcode = await scanner.scanPhoto();
-  //   setState(() => this.barcode = barcode);
-  // }
+   Future<String> getQuote(String patAddress,String otp) async {
+    String url = 'http://7a43d130.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
+    final response =
+        await http.get(url, headers: {"Accept": "application/json"});
+        //await http.get('$url/$barcode');
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> user = jsonDecode(response.body);
+      print("FUTURE : ");
+      print(user['otpAuth']);
+      print(user['otpAuth'] is String);
+      return user['otpAuth'];
+    } else {
+      throw Exception('Failed to load post');
+    }
+  }
     
   @override
   void initState() {
     super.initState();
     searchPatient();
   }
-  void searchPatient(){//Function to check if json is null or not
+  void searchPatient(){
   
     setState(() {
       _ownPatient=false;
@@ -49,9 +66,14 @@ class _ScanQRTab extends State<ScanQRTab> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
+          contentPadding: EdgeInsets.all(0.0),
           title: new Text("Enter OTP"),
-          content: Container(
+          content: Builder(
+            builder: (BuildContext context){
+            return  Container(
+            width: 500 ,
             child: PinEntryTextField(
+              fields: 6,
               showFieldAsBox: false,
               onSubmit: (String pin){
                 setState(() {
@@ -59,33 +81,33 @@ class _ScanQRTab extends State<ScanQRTab> {
                 });
               },
             ),
+          );
+            },
           ),
+          
           actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            // new FlatButton(
-            //   child: new Text("Resend OTP"),
-            //   onPressed: (){
-            //     print("resend OTP is pressed");
-              
-            //   },
-            // ),
             new FlatButton(
               child: Text("Submit"),
               onPressed: (){
-                print("OK is pressed:"+otp);//Send otp as JSON
-                setState(() {
-                  _resultOTP=true;//Write a function to send the otp and returns boolean
-                });                
-                if(_resultOTP){
+                String result;
+                getQuote(barcode, otp).then((String val){
+                  print(val);
+                  result=val;
+                  setState(() {
+                  _resultOTP=result;
+                });   
+                print(_resultOTP);
+                if(_resultOTP == 'true'){
                   Navigator.of(context).pop();
                   Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage()));
                 }
                 else{
                   final snackBar = SnackBar(content: Text('Invalid OTP'));
                   _scaffoldKey.currentState.showSnackBar(snackBar);
-                  Navigator.of(context).pop();
-                  
+                  Navigator.of(context).pop();                  
                 }
+                });
+                
                 
               },
             ),
@@ -156,103 +178,7 @@ class _ScanQRTab extends State<ScanQRTab> {
         
         
         ),
-            
-        // Column(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   crossAxisAlignment: CrossAxisAlignment.center,
-        //   children: <Widget>[
-        //     Text('Patient\'s Address:', style: new TextStyle(
-        //       color: Colors.blueGrey,
-        //       fontSize: 25.0,
-        //       fontWeight: FontWeight.bold
-        //     ),
-        //     textAlign: TextAlign.center,),
-        //     SizedBox(
-        //           height: 40.0,
-        //       ), 
-        //     Container(
-        //       width: MediaQuery.of(context).size.width * 0.9,
-        //       child: Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //       children: <Widget>[
-        //         Text('$barcode',
-        //             style: new TextStyle(
-        //             color: Colors.greenAccent,
-        //             fontSize: 17.0,
-        //             fontWeight: FontWeight.bold
-        //             ),
-        //             textAlign: TextAlign.center,
-                    
-        //            ),                   
-                    
-        //           FlatButton(
-        //         child: Icon(
-        //           Icons.content_copy
-        //         ),
-        //         onPressed: (){
-        //           ClipboardManager.copyToClipBoard(barcode).then((result) {
-        //                   final snackBar = SnackBar(
-        //                     content: Text('Copied to Clipboard'),
-        //                     action: SnackBarAction(
-        //                       label: 'Undo',
-        //                       onPressed: () {},
-        //                     ),
-        //                   );
-        //                   Scaffold.of(context).showSnackBar(snackBar);
-        //                 });
-        //         },
-        //         ),
-                  
-              
-                
-        //       ]),
-        //       decoration: BoxDecoration(
-        //               border: Border.all(
-        //                 color: Colors.blueGrey,
-        //                 width: 4.0,
-        //               ),
-        //               borderRadius: BorderRadius.all(Radius.circular(20.0))
-        //             ),
-        //     ),    
-        //     Container(
-        //       child: SizedBox(
-        //       width: 50,
-        //       height: 50,
-        //       child: Image.memory(bytes),
-        //     ),
-        //     ),         
-        //       // SizedBox(
-        //       //     height: 80.0,
-        //       // ),   
-        //       Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //       children: <Widget>[
-        //         RaisedButton(
-        //         onPressed: _scan,
-        //         child: Text("Scan",style: new TextStyle(color: Colors.white)),
-        //         color: Colors.blueGrey,
-        //         shape: RoundedRectangleBorder(
-        //             borderRadius: new BorderRadius.circular(20.0),
-        //             side: BorderSide(color: Colors.blueGrey),
-        //             ),
-        //          ),
-        //         RaisedButton(
-        //           onPressed: _scanPhoto,
-        //           child: Text("Scan Photo",style: new TextStyle(color: Colors.white),),
-        //           color: Colors.blueGrey,
-        //           shape: RoundedRectangleBorder(
-        //             borderRadius: new BorderRadius.circular(20.0),
-        //             side: BorderSide(color: Colors.blueGrey)
-        //             ),
-        //         ),
-
-        //       ],
-        //     ),
-            
-
-        //   ],
-        // ),
-        ));
+     ));
   }
   
 }

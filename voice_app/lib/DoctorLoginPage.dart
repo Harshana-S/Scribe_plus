@@ -1,13 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:voice_app/HomeTab.dart';
 
 class DoctorLoginPage extends StatefulWidget {
-  // DoctorLoginPage({Key key}) : super(key: key);
-
   _DoctorLoginPageState createState() => _DoctorLoginPageState();
 }
 
@@ -15,8 +14,9 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String barcode = '';
   Uint8List bytes = Uint8List(200);
-  bool _validLogin;
   bool _uploadedQR;
+  SharedPreferences preferences;
+  bool _goToMain;
 
   Future _scanPhoto() async {
     String barcode = await scanner.scanPhoto();
@@ -32,64 +32,62 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   }
   Future<String> getAddressPreference() async{
     SharedPreferences preferences=await SharedPreferences.getInstance();
-    if(preferences.containsKey("address")){
+    if(preferences.containsKey("address"))
       return preferences.getString("address");
-    }
     return "null";
-    
+       
   }
-  
-  bool _validateAddress(String addressResult) {   //send this addressResult to backend, get if it is an address
-        return true;
 
-}
+ Future<bool> getQuote(String docAddress) async {
+    String url = 'http://7a43d130.ngrok.io/api/doctor/login/'+docAddress;
+    final response =
+        await http.get(url, headers: {"Accept": "application/json"});
+        //await http.get('$url/$barcode');
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> user = jsonDecode(response.body);
+      print("FUTURE : ");
+      print(user['result']);
+      return user['result'];
+    } else {
+      print("ERROR FUTUTRE");
+      throw Exception('Failed to load post');
+    }
+  }
+    
   @override
   void initState() {
-    super.initState();
     _uploadedQR=false;
-    var s ="";
-    var _addressResult=getAddressPreference();
-    //print(_addressResult);
-    _addressResult.then((String add){
-     s = add;
-    });
-    print(s);
-    if(s=="null"){
-      setState(() {
-        _validLogin=false;
-      });
-    }
-    else{
-      setState(() {
-        _validLogin=true;
-      });
-    }
-    //  print(s);
-    //   if(s.isEmpty){
-    //     print(false);
-    //     setState(() {
+
+    super.initState();
+    SharedPreferences.getInstance().then((SharedPreferences sp){
+      preferences=sp;
+      var result=preferences.getString("address");
+      if(result==null){
+        _goToMain=false;
+        _setState(_goToMain);
+      }
+      else{
+        print("Calling FUTURE");
+        getQuote(result).then((bool v){
           
-    //     });
-      
-    //   }
-    //   else{
-    //     bool g = _validateAddress(s);
-    //     print(g);
-    //     setState(() {
-    //       _validLogin=g;
-    //     });
-    //   }
-    // if(_addressResult!=null){
-    //   setState(() {
-    //     _validLogin=_validateAddress(_addressResult.toString());
-    //   });
-    //   }else{
-    //     setState(() {
-    //       _validLogin=false;
-    //     });
-    //   }
+          _goToMain=v;
+         _setState(_goToMain);
+        
+        });
+        
+        
       }
 
+    });
+    
+      }
+      void _setState(bool value){
+        setState(() {
+          _goToMain=value;
+        });
+      }
         @override
         Widget build(BuildContext context) {
           return Scaffold(
@@ -100,7 +98,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
             //   elevation: defaultTargetPlatform == TargetPlatform.android? 5.0: 0.0 ,
             // ),
             body: 
-            _validLogin?
+            _goToMain?
             Builder(
               builder: (context)=>HomeTab()
             ):
@@ -150,7 +148,9 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                       ));
                     }
                     else{
-                      if(_validateAddress(barcode)){
+                      print("ELSE PART : ");
+                      getQuote(barcode).then((bool v ){
+                      if(v){
                       saveAddressPreference(barcode);
                       // Scaffold.of(context).showSnackBar(SnackBar(
                       // content: Text("Login Successful!"),
@@ -168,6 +168,8 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                         barcode="";
                       });
                     }
+                      });
+                      
                     }
                     
                   },

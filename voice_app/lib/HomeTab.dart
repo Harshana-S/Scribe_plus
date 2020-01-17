@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:voice_app/DoctorLoginPage.dart';
+import 'package:flutter/services.dart';
 import 'package:voice_app/NewPrescriptionTab.dart';
 import 'package:voice_app/ScanQRTab.dart';
 import 'package:voice_app/SearchPatientsTab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:voice_app/main.dart';
+
 
 
 
@@ -17,15 +17,6 @@ class HomeTab extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.green,
       ),
       home: VoiceHome(),
@@ -66,8 +57,12 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
   }
   Future _logout() async{
     SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
-    //sharedPreferences.remove("address");
-    print(sharedPreferences.getString("address"));
+    if(sharedPreferences.containsKey("address")){
+      sharedPreferences.remove("address");
+    }
+    // print(sharedPreferences.getString("address"));
+    
+    // print(sharedPreferences.getString("address"));
 
   }
   Widget build(BuildContext context) {
@@ -128,13 +123,10 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
               title: new Text("Log out"),
               trailing: new Icon(Icons.exit_to_app),
               onTap: (){
-                _logout();
+                
                 print("log out tapped");
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-                  builder: (context)=>DoctorLoginPage()
-                ),
-  (Route<dynamic> route) => false,);
-
+                _logout();
+                SystemNavigator.pop();
               },
             )
           ],

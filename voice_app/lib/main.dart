@@ -8,6 +8,11 @@ class SplashTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // routes: {
+      //   '/':(BuildContext context)=>SplashTab(),
+      //   '/login':(BuildContext context)=>DoctorLoginPage(),
+      //   '/home':(BuildContext context)=>HomeTab()
+      // },
       title: 'Scribe+',
       theme: ThemeData(
         primarySwatch: Colors.green
