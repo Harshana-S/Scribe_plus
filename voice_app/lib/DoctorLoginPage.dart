@@ -16,7 +16,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   Uint8List bytes = Uint8List(200);
   bool _uploadedQR;
   SharedPreferences preferences;
-  bool _goToMain;
+  bool _goToMain=true;
 
   Future _scanPhoto() async {
     String barcode = await scanner.scanPhoto();
@@ -39,7 +39,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   }
 
  Future<bool> getQuote(String docAddress) async {
-    String url = 'http://7a43d130.ngrok.io/api/doctor/login/'+docAddress;
+    String url = 'http://605f0698.ngrok.io/api/doctor/login/'+docAddress;
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
         //await http.get('$url/$barcode');
@@ -88,6 +88,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
           _goToMain=value;
         });
       }
+
         @override
         Widget build(BuildContext context) {
           return Scaffold(

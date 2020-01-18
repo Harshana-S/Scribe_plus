@@ -172,7 +172,7 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
               onPressed: (){
                 Navigator.push(context, 
                 MaterialPageRoute(
-                  builder:(context)=>GeneralDisplayReportTab())
+                  builder:(context)=>GeneralDisplayReportTab(textFromVoice:finalReport))
                 );
               },
             )

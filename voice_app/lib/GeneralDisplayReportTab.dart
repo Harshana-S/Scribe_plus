@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart' as localAuth;
 
 class GeneralDisplayReportTab extends StatefulWidget {
+  final String textFromVoice;
+  GeneralDisplayReportTab({Key key, @ required this.textFromVoice}) : super(key: key);
+  @override
   _GeneralDisplayReportTabState createState() => _GeneralDisplayReportTabState();
 }
 

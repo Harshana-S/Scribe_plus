@@ -32,7 +32,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   }
 
    Future<String> getQuote(String patAddress,String otp) async {
-    String url = 'http://7a43d130.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
+    String url = 'http://605f0698.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
         //await http.get('$url/$barcode');
@@ -99,7 +99,7 @@ class _ScanQRTab extends State<ScanQRTab> {
                 print(_resultOTP);
                 if(_resultOTP == 'true'){
                   Navigator.of(context).pop();
-                  Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage()));
+                  Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
                 }
                 else{
                   final snackBar = SnackBar(content: Text('Invalid OTP'));
@@ -124,7 +124,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   }
   void goToPatientsPage(){
     Navigator.push(context, MaterialPageRoute(
-              builder: (context)=>DisplayPatientPage()
+              builder: (context)=>DisplayPatientPage(patientAddress:barcode)
             ));
   }
   
