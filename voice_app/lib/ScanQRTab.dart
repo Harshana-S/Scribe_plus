@@ -21,7 +21,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   Uint8List bytes = Uint8List(200);
   bool _ownPatient= true;
   String otp='';
-  String _resultOTP;
+  
  
   Future _scan() async {
     String barcode = await scanner.scan();
@@ -32,7 +32,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   }
 
    Future<String> getQuote(String patAddress,String otp) async {
-    String url = 'http://605f0698.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
+    String url = 'http://15d08bce.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
         //await http.get('$url/$barcode');
@@ -89,27 +89,23 @@ class _ScanQRTab extends State<ScanQRTab> {
             new FlatButton(
               child: Text("Submit"),
               onPressed: (){
-                String result;
-                getQuote(barcode, otp).then((String val){
-                  print(val);
-                  result=val;
-                  setState(() {
-                  _resultOTP=result;
-                });   
-                print(_resultOTP);
-                if(_resultOTP == 'true'){
-                  Navigator.of(context).pop();
-                  Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
-                }
-                else{
-                  final snackBar = SnackBar(content: Text('Invalid OTP'));
-                  _scaffoldKey.currentState.showSnackBar(snackBar);
-                  Navigator.of(context).pop();                  
-                }
+                print('Doctor:$barcode');
+                getQuote(this.barcode, otp).then((String result){
+                  if(result=='true'){
+                Navigator.of(context).pop();
+                Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
+                  }
+                  else{
+                Navigator.of(context).pop();
+                Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Text("Invalid OTP"),
+                      ));
+                  }
                 });
-                
+
                 
               },
+            
             ),
             new FlatButton(
               child: new Text("Close"),

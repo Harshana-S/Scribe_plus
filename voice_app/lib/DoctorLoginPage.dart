@@ -17,6 +17,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   bool _uploadedQR;
   SharedPreferences preferences;
   bool _goToMain=true;
+  
 
   Future _scanPhoto() async {
     String barcode = await scanner.scanPhoto();
@@ -39,7 +40,8 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
   }
 
  Future<bool> getQuote(String docAddress) async {
-    String url = 'http://605f0698.ngrok.io/api/doctor/login/'+docAddress;
+    String url = 'http://15d08bce.ngrok.io/api/doctor/login/'+docAddress;
+    print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
         //await http.get('$url/$barcode');
@@ -47,8 +49,6 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     if (response.statusCode == 200) {
       print(response.body);
       Map<String, dynamic> user = jsonDecode(response.body);
-      print("FUTURE : ");
-      print(user['result']);
       return user['result'];
     } else {
       print("ERROR FUTUTRE");
@@ -72,7 +72,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
         print("Calling FUTURE");
         getQuote(result).then((bool v){
           
-          _goToMain=v;
+          _goToMain=true;
          _setState(_goToMain);
         
         });
