@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart' as localAuth;
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class GeneralDisplayReportTab extends StatefulWidget {
   final String textFromVoice;
@@ -82,6 +85,45 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
       
     // });
   } 
+
+  Map toMap(){
+    var map = new Map<String, dynamic>();
+    map["name"] = "Aparna";
+    map["age"] = "20";
+    map["symptoms"] = "symptoms";
+    map["diagnosis"] = "diagnosis";
+    map["remarks"] = "remarks";
+    map["phoneno"] = "8939411718";
+    map["email"] = "aparna.k799@gmail.com";
+    return map;
+  }
+  Future<String> createPost(String url) async {
+    Map<String, String> headers = {"Content-type": "application/json"};
+    var map = new Map<String, dynamic>();
+    map["name"] = "Aparna";
+    map["age"] = "20";
+    map["symptoms"] = "symptoms";
+    map["diagnosis"] = "diagnosis";
+    map["remarks"] = "remarks";
+    map["phoneno"] = "8939411718";
+    map["email"] = "aparna.k799@gmail.com";
+    print("Entered");
+    String req = '{"name":"'+nameController.text+'","age":"'+ageController.text+'","symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'"}';
+    print(req);
+   http.post(url, headers: headers, body: req).then((http.Response response) {
+    final int statusCode = response.statusCode;
+ 
+    if (statusCode < 200 || statusCode > 400 || json == null) {
+      throw new Exception("Error while fetching data");
+
+    }
+    else
+    {
+      return (response.body);
+    }
+    
+  });
+}
   void initialiseFromJSON(){
     _name="Name";
     _age="23";
@@ -320,7 +362,10 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 RaisedButton(
                   color: Colors.green,
                   child: Text("Send",style:TextStyle(color: Colors.white)),
-                  onPressed:()=> print("object"),
+                  onPressed:() async=> {
+                    print("object"),
+                    await createPost('http://15d08bce.ngrok.io/api/patient/create')
+                  }
                 )
 
                   ],
