@@ -24,6 +24,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+  flare_flutter: any
   speech_recognition: ^0.3.0+1
   qrscan: ^0.2.17
   clipboard_manager: ^0.0.1

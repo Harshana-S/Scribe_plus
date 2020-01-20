@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:voice_app/DoctorLoginPage.dart';
-
 void main() => runApp(SplashTab());
 
 class SplashTab extends StatelessWidget {

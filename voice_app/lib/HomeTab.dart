@@ -6,6 +6,7 @@ import 'package:voice_app/NewPrescriptionTab.dart';
 import 'package:voice_app/ScanQRTab.dart';
 import 'package:voice_app/SearchPatientsTab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:voice_app/updatePatient.dart';
 
 
 
@@ -65,6 +66,7 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
     // print(sharedPreferences.getString("address"));
 
   }
+ 
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -99,6 +101,14 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
                 color: Colors.red
               ),),
               trailing: new Icon(Icons.local_hospital),
+            ),
+            new ListTile(
+              title: new Text("Update Patient"),
+              trailing: new Icon(Icons.person_outline),
+              onTap: (){
+                Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => updatePatient()),);
+              },
             ),
             new ListTile(
               title: new Text("Profile"),
