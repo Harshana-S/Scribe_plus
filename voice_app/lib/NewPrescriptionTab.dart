@@ -61,19 +61,12 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
       centerTitle: true,
       backgroundColor: Colors.grey[100],
     ),
+    resizeToAvoidBottomInset: false,
+    resizeToAvoidBottomPadding: false,
     body: SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          RaisedButton(
-            color: Colors.green,
-            child: Text("Reset", style: TextStyle(color: Colors.white),),
-            onPressed: (){
-              setState(() {
-                _displayText=false;
-              });
-            },
-          ),
           Container(
             child: Column(
               children: <Widget>[
@@ -164,6 +157,9 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
                 child: Text(finalReport),
               ),
             ),
+            Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[ 
             RaisedButton(
               child: Text("Generate Report",style: TextStyle(
                 color: Colors.white
@@ -175,7 +171,18 @@ class _NewPrescriptionTabState extends State<NewPrescriptionTab> {
                   builder:(context)=>GeneralDisplayReportTab(textFromVoice:finalReport))
                 );
               },
-            )
+            ),
+            RaisedButton(
+            color: Colors.green,
+            child: Text("Reset", style: TextStyle(color: Colors.white),),
+            onPressed: (){
+              setState(() {
+                _displayText=false;
+              });
+            },
+          ),
+            ],)
+            
             ],
           )
         ) : SizedBox(width: 2.0,)

@@ -5,14 +5,16 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 
-class updatePatient extends StatefulWidget {
-  
-  updatePatient({Key key, }) : super(key: key);
+class UpdatePatient extends StatefulWidget {
+  final String patientAddress, doctorAddress;
+  UpdatePatient({Key key,@required this.patientAddress,@required this.doctorAddress }) : super(key: key);
   @override
-  _updatePatientState createState() => _updatePatientState();
+  _UpdatePatientState createState() => _UpdatePatientState(this.patientAddress, this.doctorAddress);
 }
 
-class _updatePatientState extends State<updatePatient> {
+class _UpdatePatientState extends State<UpdatePatient> {
+  String patientAddress, doctorAddress;
+  _UpdatePatientState(this.patientAddress,this.doctorAddress);
   TextEditingController symptomsController, diagnosisController, prescriptionController, remarksController, phoneNumberController, emailController;
   String _symptoms, _diagnosis, _prescription, _remarks;
 
@@ -50,9 +52,6 @@ class _updatePatientState extends State<updatePatient> {
     });
   }
 
-  
-
-
   @override
   void initState() {
     super.initState();
@@ -71,17 +70,6 @@ class _updatePatientState extends State<updatePatient> {
       
     });
     
-  
-    // .then((bool result){
-
-    //   print(result);
-    //   // this.setState(
-    //   //   hasFingerPrint=result;
-    //   // );
-      
-    
-      
-    // });
   } 
 
   Map toMap(){
@@ -96,15 +84,7 @@ class _updatePatientState extends State<updatePatient> {
   }
   Future<String> createPost(String url) async {
     Map<String, String> headers = {"Content-type": "application/json"};
-    var map = new Map<String, dynamic>();
-   
-    map["symptoms"] = "symptoms";
-    map["diagnosis"] = "diagnosis";
-    map["remarks"] = "remarks";
-    map["phoneno"] = "8939411718";
-    map["email"] = "aparna.k799@gmail.com";
-    print("Entered");
-    String req = '{symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'"}';
+    String req = '{"patientAddress" : "$patientAddress",	"prescription" : "'+prescriptionController.text+'",'+' "advice" : "'+remarksController.text+'", "symptoms" : "'+symptomsController.text+'", "diagnosis" :"'+ diagnosisController.text+'", 	"doctorAddress" : "$doctorAddress", "date"  : "20/01/2020"}';
     print(req);
    http.post(url, headers: headers, body: req).then((http.Response response) {
     final int statusCode = response.statusCode;
@@ -122,9 +102,9 @@ class _updatePatientState extends State<updatePatient> {
 }
   void initialiseFromJSON(){
     
-    _symptoms="Cough\nCold";
+    _symptoms="Cough Cold";
     _diagnosis="Fever";
-    _prescription="Dolo650\nCrocin";
+    _prescription="Dolo650 Crocin";
     _remarks="remarks";
   }
   void initialiseControllers(){
@@ -178,6 +158,7 @@ class _updatePatientState extends State<updatePatient> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  keyboardType: TextInputType.multiline,
                   controller: symptomsController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -200,6 +181,7 @@ class _updatePatientState extends State<updatePatient> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  keyboardType: TextInputType.multiline,
                   controller: diagnosisController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -222,6 +204,7 @@ class _updatePatientState extends State<updatePatient> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  keyboardType: TextInputType.multiline,
                   controller: prescriptionController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -245,6 +228,7 @@ class _updatePatientState extends State<updatePatient> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                    
                   controller: remarksController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -252,54 +236,6 @@ class _updatePatientState extends State<updatePatient> {
                 ),                              
               ],
             ),
-            )
-            ,
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text("Contact",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: TextField(
-                  controller: phoneNumberController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder())
-                  ),
-                ),              
-                
-              ],
-            ),
-            )
-            ,
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text("Email",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder())
-                  ),
-                )
-                
-              ],
-            )
             )
             ,
             SizedBox(
@@ -328,7 +264,7 @@ class _updatePatientState extends State<updatePatient> {
                   child: Text("Send",style:TextStyle(color: Colors.white)),
                   onPressed:() async=> {
                     print("object"),
-                    await createPost('http://3c87352c.ngrok.io/api/patient/update')
+                    await createPost('http://c68ee564.ngrok.io/api/patient/update')
                   }
                 )
 

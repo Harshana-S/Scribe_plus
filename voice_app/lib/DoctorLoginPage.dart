@@ -27,9 +27,10 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     });
     print(barcode);
   }
-  Future saveAddressPreference(String barcode) async{
+  Future saveAddressPreference(String barcode, String value) async{
     SharedPreferences preferences=await SharedPreferences.getInstance();
     preferences.setString("address", barcode);
+    preferences.setString("key", value);
   }
   Future<String> getAddressPreference() async{
     SharedPreferences preferences=await SharedPreferences.getInstance();
@@ -39,8 +40,8 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
        
   }
 
- Future<bool> getQuote(String docAddress) async {
-    String url = 'http://15d08bce.ngrok.io/api/doctor/login/'+docAddress;
+ Future<String> getQuote(String docAddress) async {
+    String url = 'http://c68ee564.ngrok.io/api/doctor/login/'+docAddress;
     print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
@@ -49,7 +50,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     if (response.statusCode == 200) {
       print(response.body);
       Map<String, dynamic> user = jsonDecode(response.body);
-      return user['result'];
+      return user['result']['0'];
     } else {
       print("ERROR FUTUTRE");
       throw Exception('Failed to load post');
@@ -70,10 +71,12 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
       }
       else{
         print("Calling FUTURE");
-        getQuote(result).then((bool v){
+        getQuote(result).then((String v){
+          if(v!=null){
+            _goToMain=true;
+          _setState(_goToMain);
+          }
           
-          _goToMain=true;
-         _setState(_goToMain);
         
         });
         
@@ -150,9 +153,9 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                     }
                     else{
                       print("ELSE PART : ");
-                      getQuote(barcode).then((bool v ){
-                      if(v){
-                      saveAddressPreference(barcode);
+                      getQuote(barcode).then((String value){
+                      if(value!=null){
+                      saveAddressPreference(barcode,value);
                       // Scaffold.of(context).showSnackBar(SnackBar(
                       // content: Text("Login Successful!"),
                       // ));

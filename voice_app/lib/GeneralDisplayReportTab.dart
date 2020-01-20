@@ -73,47 +73,18 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
       
     });
     
-  
-    // .then((bool result){
-
-    //   print(result);
-    //   // this.setState(
-    //   //   hasFingerPrint=result;
-    //   // );
-      
-    
-      
-    // });
   } 
 
-  Map toMap(){
-    var map = new Map<String, dynamic>();
-    map["name"] = "Aparna";
-    map["age"] = "20";
-    map["symptoms"] = "symptoms";
-    map["diagnosis"] = "diagnosis";
-    map["remarks"] = "remarks";
-    map["phoneno"] = "8939411718";
-    map["email"] = "aparna.k799@gmail.com";
-    return map;
-  }
   Future<String> createPost(String url) async {
     Map<String, String> headers = {"Content-type": "application/json"};
-    var map = new Map<String, dynamic>();
-    map["name"] = "Aparna";
-    map["age"] = "20";
-    map["symptoms"] = "symptoms";
-    map["diagnosis"] = "diagnosis";
-    map["remarks"] = "remarks";
-    map["phoneno"] = "8939411718";
-    map["email"] = "aparna.k799@gmail.com";
     print("Entered");
-    String req = '{"name":"'+nameController.text+'","age":"'+ageController.text+'","symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'"}';
+    String req = '{"name":"'+nameController.text+'","age":"'+ageController.text+'","symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'","date":"20/01/2020"}';
     print(req);
    http.post(url, headers: headers, body: req).then((http.Response response) {
     final int statusCode = response.statusCode;
  
-    if (statusCode < 200 || statusCode > 400 || json == null) {
+    if (statusCode < 200 || statusCode > 400 ) {
+      print(statusCode);
       throw new Exception("Error while fetching data");
 
     }
@@ -127,9 +98,9 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
   void initialiseFromJSON(){
     _name="Name";
     _age="23";
-    _symptoms="Cough\nCold";
+    _symptoms="Cough Cold";
     _diagnosis="Fever";
-    _prescription="Dolo650\nCrocin";
+    _prescription="Dolo650 Crocin";
     _remarks="remarks";
   }
   void initialiseControllers(){
@@ -164,6 +135,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  //keyboardType: TextInputType.multiline,
                   controller: nameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -214,6 +186,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  //keyboardType: TextInputType.multiline,
                   controller: symptomsController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -236,6 +209,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  //keyboardType: TextInputType.multiline,
                   controller: diagnosisController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -258,6 +232,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  //keyboardType: TextInputType.multiline,
                   controller: prescriptionController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -281,6 +256,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
+                  //keyboardType: TextInputType.multiline,
                   controller: remarksController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder())
@@ -364,7 +340,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                   child: Text("Send",style:TextStyle(color: Colors.white)),
                   onPressed:() async=> {
                     print("object"),
-                    await createPost('http://15d08bce.ngrok.io/api/patient/create')
+                    await createPost('http://c68ee564.ngrok.io/api/patient/create')
                   }
                 )
 

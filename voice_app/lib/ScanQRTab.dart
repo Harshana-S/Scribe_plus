@@ -2,37 +2,50 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:pin_entry_text_field/pin_entry_text_field.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:voice_app/DisplayPatientPage.dart';
 import 'package:http/http.dart' as http;
 
 class ScanQRTab extends StatefulWidget {
-
   _ScanQRTab createState() => _ScanQRTab();
 }
 
 class _ScanQRTab extends State<ScanQRTab> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-
   
   String barcode = '';
   Uint8List bytes = Uint8List(200);
   bool _ownPatient= true;
   String otp='';
+  String docAddress, docKey;
+  bool _startScan=true;
   
  
-  Future _scan() async {
+  Future<String> _scan() async {
     String barcode = await scanner.scan();
     setState((){
       this.barcode = barcode;
       print(barcode);//Convert to JSON and Send
     } );
+    return barcode;
+  }
+  Future<String> getDoctorAddress() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    print(sharedPreferences.getKeys());
+    return sharedPreferences.getString("address");
+  }
+  Future<String> getDoctorKey() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    print(sharedPreferences.getKeys());
+    return sharedPreferences.getString("key");
   }
 
-   Future<String> getQuote(String patAddress,String otp) async {
-    String url = 'http://15d08bce.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp;
+   Future<String> verifyOTP(String patAddress,String otp) async {
+    String url = 'http://c68ee564.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp+'/$docKey';
+    print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
         //await http.get('$url/$barcode');
@@ -48,18 +61,75 @@ class _ScanQRTab extends State<ScanQRTab> {
       throw Exception('Failed to load post');
     }
   }
+  Future<String> getPatient(String patAddress) async {
+    String url = 'http://c68ee564.ngrok.io/api/patient/get/'+patAddress+'/'+docAddress+'/$docKey';
+    print(url);
+    final response =
+        await http.get(url, headers: {"Accept": "application/json"});
+        //await http.get('$url/$barcode');
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> user = jsonDecode(response.body);
+      return user['result']['0'];
+    } else {
+      throw Exception('Failed to load post');
+    }
+  }
+
+  Future sendOTP() async {
+    String url = 'http://c68ee564.ngrok.io/api/patient/sendOTP/$barcode';
+    print('Send OTP:$url');
+    final response =
+        await http.get(url, headers: {"Accept": "application/json"});
+        //await http.get('$url/$barcode');
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map<String, dynamic> user = jsonDecode(response.body);
+      return user['0'];
+    } else {
+      throw Exception('Failed to load post');
+    }
+  }
+
+
     
   @override
   void initState() {
     super.initState();
-    searchPatient();
-  }
-  void searchPatient(){
-  
-    setState(() {
-      _ownPatient=false;
+    this.barcode='';
+    getDoctorAddress().then((String address) async {
+      print("$address");
+      setState(() {
+        docAddress = address;
+      });    
     });
+    getDoctorKey().then((String value) async {
+      print("$value");
+      setState(() {
+        docKey = value;
+      });    
+    });
+    _scan().then((String qrcode){
+                    getPatient(qrcode).then((String result){
+                    print('After scanning patient $result');
+                    print(result=='');
+                    if(result!=''){
+                      print(result);
+                      goToPatientsPage();
+                    }
+                    else{
+                      sendOTP();
+                      print(result);
+                      showOTPDialog();
+
+                    }
+                  });
+                  });
+
   }
+
   void showOTPDialog(){
     showDialog(
       context: context,
@@ -90,10 +160,10 @@ class _ScanQRTab extends State<ScanQRTab> {
               child: Text("Submit"),
               onPressed: (){
                 print('Doctor:$barcode');
-                getQuote(this.barcode, otp).then((String result){
+                verifyOTP(this.barcode, otp).then((String result){
                   if(result=='true'){
                 Navigator.of(context).pop();
-                Navigator.of(_scaffoldKey.currentContext).push(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
+                Navigator.of(_scaffoldKey.currentContext).pushReplacement(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
                   }
                   else{
                 Navigator.of(context).pop();
@@ -136,45 +206,13 @@ class _ScanQRTab extends State<ScanQRTab> {
         centerTitle: true,
         backgroundColor: Colors.grey[100],
       ),
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                RaisedButton(
-                onPressed: (){
-                  _scan();
-                  
-                },
-                child: Text("Scan",style: new TextStyle(color: Colors.white)),
-                color: Colors.blueGrey,
-                shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0),
-                    side: BorderSide(color: Colors.blueGrey),
-                    ),
-                 ),
-            
-          ],
-        ),
-        _ownPatient?
-            RaisedButton(
-              color: Colors.green,
-              child: Text("View Result",style:TextStyle(color: Colors.white)),
-              onPressed:()=> goToPatientsPage(),
-            ):
-            RaisedButton(
-              color: Colors.green,
-              child: Text("Get Patient Authorization",style:TextStyle(color: Colors.white)),
-              onPressed:()=> showOTPDialog(),
-            ),
-        
-        ],
-        
-        
-        ),
-     ));
+      body: Center(
+        child: Container(
+          child: SpinKitWave(
+            color: Colors.green,
+          ),
+        )
+      ));
   }
   
 }

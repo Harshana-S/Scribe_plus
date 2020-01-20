@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:voice_app/ScanQRTab.dart';
+import 'package:voice_app/updatePatient.dart';
+
 
 class DisplayPatientPage extends StatefulWidget {
   final String patientAddress;
@@ -17,7 +20,7 @@ class DisplayPatientPage extends StatefulWidget {
 }
 
 class _DisplayPatientPageState extends State<DisplayPatientPage> {
-  String patientAddress, docAddress;
+  String patientAddress, docAddress, docKey;
   int cards = 0;
 
   String patName, patAge;
@@ -34,6 +37,11 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
     return sharedPreferences.getString("address");
   }
 
+  Future<String> getDoctorKey() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    print(sharedPreferences.getKeys());
+    return sharedPreferences.getString("key");
+  }
 
   void getPrescriptionDialog(String symptoms,String diagnosis, String medicines, String advice) {
     showDialog(
@@ -118,7 +126,7 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
                               width: double.infinity,
                               margin: EdgeInsets.all(15.0),
                               padding: EdgeInsets.all(10.0),
-                              child: Text(medicines, style: TextStyle(fontSize: 15.0,)),
+                              child: Text('$medicines', style: TextStyle(fontSize: 15.0,)),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.black, width: 1.0)
                               ),
@@ -139,7 +147,7 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
                               width: double.infinity,
                               margin: EdgeInsets.all(15.0),
                               padding: EdgeInsets.all(10.0),
-                              child: Text(advice, style: TextStyle(fontSize: 15.0,)),
+                              child: Text('$advice', style: TextStyle(fontSize: 15.0,)),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.black, width: 1.0)
                               ),
@@ -177,12 +185,15 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
       setState(() {
         docAddress = address;
       });
+      getDoctorKey().then((String value) async {
+      print("$value");
+      setState(() {
+        docKey = value;
+      }); 
       print('Patient:$patientAddress/nDoctor:$docAddress');
-      String url =
-          'http://15d08bce.ngrok.io/api/patient/get/$patientAddress/$docAddress';
-      print(url);
-      final response =
-          await http.get(url, headers: {"Accept": "application/json"});
+      String url = 'http://c68ee564.ngrok.io/api/patient/get/$patientAddress/$docAddress/$docKey';
+      print('DISPLAY:$url');
+      final response = await http.get(url, headers: {"Accept": "application/json"});
 
       if (response.statusCode == 200) {
         print(response.body);
@@ -204,7 +215,9 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
 
       } else {
         throw Exception('Failed to load post');
-      }
+      }   
+    });
+      
     });
   }
 
@@ -213,6 +226,18 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
     return (_fetchedResults==true)?Scaffold(
       appBar: AppBar(
         title: Text('Patient Reports'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: (){
+              Builder(
+              builder: (context)=>ScanQRTab()
+            );
+            } ,
+          ),
+          
+          
+        ],
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -257,7 +282,7 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
                         String index = prescriptions[i];
                         print("INDEX : $index");
                         String url =
-                            'http://15d08bce.ngrok.io/api/patient/prescription/$index';
+                            'http://c68ee564.ngrok.io/api/patient/prescription/$index';
                         final response = await http.get(url, headers: {"Accept": "application/json"});
                         if (response.statusCode == 200) {
                           print(response.body);
@@ -277,7 +302,10 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
       floatingActionButton: FloatingActionButton(
         mini: false,
         child: Icon(Icons.person_add, color: Colors.white),
-        onPressed: () => print('Plus'),
+        onPressed: (){
+          Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => UpdatePatient(patientAddress: patientAddress,doctorAddress: docAddress,)),);
+        },
       ),
     ):
     Scaffold(
