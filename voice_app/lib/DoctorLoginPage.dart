@@ -1,32 +1,31 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:voice_app/HomeTab.dart';
+import 'package:lottie_flutter/lottie_flutter.dart';
+import 'package:voice_app/url.dart';
 
 class DoctorLoginPage extends StatefulWidget {
   _DoctorLoginPageState createState() => _DoctorLoginPageState();
 }
 
-class _DoctorLoginPageState extends State<DoctorLoginPage> {
+class _DoctorLoginPageState extends State<DoctorLoginPage> with TickerProviderStateMixin{
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String barcode = '';
   Uint8List bytes = Uint8List(200);
   bool _uploadedQR;
   SharedPreferences preferences;
   bool _goToMain=true;
-  
+  LottieComposition _composition;
+  AnimationController _controller;
+  bool _repeat;
+  bool animation_not_over=true;
 
-  Future _scanPhoto() async {
-    String barcode = await scanner.scanPhoto();
-    setState(() {
-      this.barcode = barcode;
-      _uploadedQR=true;
-    });
-    print(barcode);
-  }
   Future saveAddressPreference(String barcode, String value) async{
     SharedPreferences preferences=await SharedPreferences.getInstance();
     preferences.setString("address", barcode);
@@ -40,8 +39,8 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
        
   }
 
- Future<String> getQuote(String docAddress) async {
-    String url = 'http://c68ee564.ngrok.io/api/doctor/login/'+docAddress;
+ Future<String> validate(String docAddress) async {
+    String url = '$ngrok_url/api/doctor/login/'+docAddress;
     print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
@@ -56,12 +55,35 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
       throw Exception('Failed to load post');
     }
   }
+  Future<LottieComposition> loadAsset(String assetName) async {
+  return await rootBundle
+      .loadString(assetName)
+      .then<Map<String, dynamic>>((String data) => json.decode(data))
+      .then((Map<String, dynamic> map) =>  LottieComposition.fromMap(map));
+}
     
   @override
   void initState() {
     _uploadedQR=false;
-
     super.initState();
+    _repeat = false;
+    _controller =  AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    );
+    loadAsset("assets/doctoranimation.json").then((LottieComposition composition) {
+      setState(() {
+        _composition = composition;
+        _controller.reset();
+        _controller.forward();
+      });
+    });
+    _controller.addListener(() => setState(() {}));
+    Timer(Duration(seconds: 6), (){
+      setState(() {
+        animation_not_over=false;
+      });
+    });
     SharedPreferences.getInstance().then((SharedPreferences sp){
       preferences=sp;
       var result=preferences.getString("address");
@@ -70,22 +92,18 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
         _setState(_goToMain);
       }
       else{
-        print("Calling FUTURE");
-        getQuote(result).then((String v){
+        validate(result).then((String v){
           if(v!=null){
             _goToMain=true;
           _setState(_goToMain);
-          }
-          
-        
+          }        
         });
-        
-        
       }
 
-    });
-    
+  
       }
+    );
+    }
       void _setState(bool value){
         setState(() {
           _goToMain=value;
@@ -96,64 +114,56 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
         Widget build(BuildContext context) {
           return Scaffold(
             key: _scaffoldKey,
-            // appBar: new AppBar(
-            //   title: new Text("Scribe +"),
-            //   centerTitle: true,
-            //   elevation: defaultTargetPlatform == TargetPlatform.android? 5.0: 0.0 ,
-            // ),
+            backgroundColor: primaryColorShades,
             body: 
             _goToMain?
             Builder(
               builder: (context)=>HomeTab()
             ):
+            
             Container(
               child: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
+                  
+                  Text(
+                    "SCRIBE +",
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 8,
+                      fontSize: 50,
+                      fontWeight: FontWeight.w200
+                    ),                    
+                  ),
+                  Lottie(
+                      composition: _composition,
+                      size: const Size(300.0, 300.0),
+                      controller: _controller,
+                  ),
+                  animation_not_over?
+                  SizedBox(
+                    height: 10.0,                  
+                  ):
                   Padding(
                     padding: EdgeInsets.all(20.0),
-                    child: Card(
-                  elevation: 10.0,
-                  child: Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                    RaisedButton(
-                    color: Colors.green,
-                    child: Text("Upload QR code",style: TextStyle(color: Colors.white),),
-                    onPressed: _scanPhoto,
-                  ),
-                  
-                
-                _uploadedQR?
-                Container(
-                  child: Icon(Icons.cloud_done,size:30.0),
-                ):
-                Container(
-                  child: Icon(Icons.add_photo_alternate,size:30.0),
-                )
-      
-                    ],
-                  ),),),
-                  ),
-                Builder(
-                  builder: (context){
-                    return RaisedButton(
-                  color: Colors.blueGrey,
-                  child: Text("Login",style: TextStyle(color: Colors.white),),
-                  onPressed: (){
-                    print("Login pressed");
-                    if(barcode==""){
+                    child: RaisedButton(
+                    color: Colors.white,
+                    child: Text("Upload QR code",style: TextStyle(color: Colors.black),),
+                    onPressed: () async{
+                      await scanner.scanPhoto().then((String barcode){
+                        setState(() {
+                          this.barcode=barcode;
+
+                        });
+                      if(barcode==""){
                       Scaffold.of(context).showSnackBar(SnackBar(
                       content: Text("Invalid QR code"),
                       ));
                     }
                     else{
-                      print("ELSE PART : ");
-                      getQuote(barcode).then((String value){
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>HomeTab()));
+                      validate(barcode).then((String value){
                       if(value!=null){
                       saveAddressPreference(barcode,value);
                       // Scaffold.of(context).showSnackBar(SnackBar(
@@ -161,7 +171,6 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                       // ));
                       //Navigator.of(context).dispose();
                       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>HomeTab()));
-
                     }
                     else{
                       Scaffold.of(context).showSnackBar(SnackBar(
@@ -175,15 +184,12 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                       });
                       
                     }
-                    
-                  },
-                );
-                  },
-                  
-                ),  
-                  
-                
-                  ],
+                      });
+
+                    },
+                  ),
+                  ),            
+                ],
                 )
               )
             ),
@@ -191,4 +197,4 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
         }
       }
       
-      
+

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:voice_app/ScanQRTab.dart';
+import 'package:voice_app/HomeTab.dart';
 import 'package:voice_app/updatePatient.dart';
+import 'package:voice_app/url.dart';
 
 
 class DisplayPatientPage extends StatefulWidget {
@@ -181,7 +182,7 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
   void initState() {
     super.initState();
     getPatientRecords().then((String address) async {
-      print("$address");
+      print("TRIALLL: $address");
       setState(() {
         docAddress = address;
       });
@@ -191,22 +192,22 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
         docKey = value;
       }); 
       print('Patient:$patientAddress/nDoctor:$docAddress');
-      String url = 'http://c68ee564.ngrok.io/api/patient/get/$patientAddress/$docAddress/$docKey';
+      String url = '$ngrok_url/api/patient/get/$patientAddress/$docAddress/$docKey';
       print('DISPLAY:$url');
       final response = await http.get(url, headers: {"Accept": "application/json"});
 
       if (response.statusCode == 200) {
         print(response.body);
         Map<String, dynamic> user = jsonDecode(response.body);
-        print(user);
-        print(user['result']['0']);
-        print(user['result']['1']);
-        print(user['result']['5']);
-        print(user['result']['1'] is String);
-        print(user['result']['5'] is String);
+        // print(user);
+        // print(user['result']['0']);
+        // print(user['result']['1']);
+        // print(user['result']['5']);
+        // print(user['result']['1'] is String);
+        // print(user['result']['5'] is String);
         setState(() {
           this.patName = user['result']['0'];
-          this.patAge = user['result']['1'];
+          this.patAge = "32";
           this.noOfPres = user['result']['1'];
           this.prescriptions = user['result']['2'];
           this.dates = user['result']['5'];
@@ -223,16 +224,23 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
 
   @override
   Widget build(BuildContext context) {
-    return (_fetchedResults==true)?Scaffold(
+    return (_fetchedResults==true)?
+    Scaffold(
       appBar: AppBar(
-        title: Text('Patient Reports'),
+        title: Text('PATIENT REPORT',
+        style: TextStyle(
+          color:Colors.white,
+          letterSpacing: 4,
+          fontWeight: FontWeight.w300
+        ),),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.close),
             onPressed: (){
-              Builder(
-              builder: (context)=>ScanQRTab()
-            );
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (BuildContext context)=>HomeTab())
+              );
+            
             } ,
           ),
           
@@ -248,41 +256,67 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
             Padding(
               padding: EdgeInsets.all(5.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    "Patient Name",
+                    patName.toUpperCase(),
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
+                        color: Colors.black, fontWeight: FontWeight.w400, letterSpacing: 4, fontSize: 20),
                   ),
-                  Text(patName)
                 ],
               ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height*0.02,
             ),
             Padding(
               padding: EdgeInsets.all(5.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text(
-                    "Patient Age",
+                    "M",
                     style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
+                        color: Colors.black,  fontSize: 17),
                   ),
-                  Text(patAge)
+                  Text("$patAge Y",
+                  style: TextStyle(
+                        color: Colors.black,  fontSize: 17),)
                 ],
               ),
             ),
+             SizedBox(
+              height: MediaQuery.of(context).size.height*0.02,
+            ),
+            Text("Prescriptions: $noOfPres",
+            textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black, fontSize: 15),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height*0.04,
+            ),
             for (int i = 0; i < dates.length; i++)
               Padding(
-                padding: EdgeInsets.all(2.0),
+                padding: EdgeInsets.all(10.0),
                 child: Card(
+                  color: Colors.black,
                   elevation: 15.0,
                   child: ListTile(
-                      title: Text(dates[i]),
+                      title: Text(
+                        dates[i],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 2
+                        ),),
                       onTap: () async {
                         String index = prescriptions[i];
                         print("INDEX : $index");
                         String url =
-                            'http://c68ee564.ngrok.io/api/patient/prescription/$index';
+                            '$ngrok_url/api/patient/prescription/$index';
                         final response = await http.get(url, headers: {"Accept": "application/json"});
                         if (response.statusCode == 200) {
                           print(response.body);
@@ -300,8 +334,9 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
         mini: false,
-        child: Icon(Icons.person_add, color: Colors.white),
+        child: Icon(Icons.add_box, color: Colors.white),
         onPressed: (){
           Navigator.push(
                   context, MaterialPageRoute(builder: (context) => UpdatePatient(patientAddress: patientAddress,doctorAddress: docAddress,)),);
@@ -315,7 +350,7 @@ class _DisplayPatientPageState extends State<DisplayPatientPage> {
       ),
       body:(_timedOut==false)?Center(
         child: SpinKitFadingGrid(
-          color: Colors.green,
+          color: Colors.black,
         ),
       ):Timer(Duration(seconds: 8),
           (){

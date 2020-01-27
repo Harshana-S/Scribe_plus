@@ -2,23 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart' as localAuth;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:lottie_flutter/lottie_flutter.dart';
+import 'package:voice_app/HomeTab.dart';
+import 'package:voice_app/NewPrescriptionTab.dart';
+import 'package:voice_app/url.dart';
+import 'package:intl/intl.dart';
 
 class GeneralDisplayReportTab extends StatefulWidget {
-  final String textFromVoice;
-  GeneralDisplayReportTab({Key key, @ required this.textFromVoice}) : super(key: key);
+  final String name,age,diagnosis,medicines,symptoms;
+  GeneralDisplayReportTab({Key key, @ required this.name, @ required this.age, @ required this.diagnosis, @ required this.medicines, @ required this.symptoms}) : super(key: key);
   @override
-  _GeneralDisplayReportTabState createState() => _GeneralDisplayReportTabState();
+  _GeneralDisplayReportTabState createState() => _GeneralDisplayReportTabState(this.name,this.age,this.diagnosis,this.medicines,this.symptoms);
 }
 
-class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
+class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> with SingleTickerProviderStateMixin{
   TextEditingController nameController, ageController, symptomsController, diagnosisController, prescriptionController, remarksController, phoneNumberController, emailController;
-  String _name, _age, _symptoms, _diagnosis, _prescription, _remarks;
-
+  String name,age,diagnosis,medicines,symptoms,remarks;
+  String docAddress;
+  _GeneralDisplayReportTabState(this.name,this.age,this.diagnosis,this.medicines,this.symptoms);
+  DateTime _dateTime;
+  
   localAuth.LocalAuthentication localAuthentication=localAuth.LocalAuthentication();
   bool hasFingerPrint=false;
   bool notAuthenticatedFingerprint=true;
+    Future<String> getPatientRecords() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    print(sharedPreferences.getKeys());
+    return sharedPreferences.getString("address");
+  }
 
   Future<bool> checkBiometrics() async{
     
@@ -50,21 +64,31 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
     });
   }
 
-  
+    
 
 
   @override
   void initState() {
     super.initState();
-    initialiseFromJSON();
+    var now = new DateTime.now();
+    var formatter = new DateFormat('yyyy-MM-dd');
+    String formatted = formatter.format(now);
+    print(formatted);
+    getPatientRecords().then((String address) async {
+      print("$address");
+      setState(() {
+        docAddress = address;
+      });
+        });
+    
     initialiseControllers();
-    nameController.text=_name;
-    ageController.text=_age;
-    symptomsController.text=_symptoms;
-    diagnosisController.text=_diagnosis;
-    prescriptionController.text=_prescription;
-    remarksController.text=_remarks;
-    print("object");
+    nameController.text=this.name;
+    ageController.text=this.age;
+    symptomsController.text=this.symptoms;
+    diagnosisController.text=this.diagnosis;
+    prescriptionController.text=this.medicines;
+    remarksController.text='';
+    print('NAme'+name);
     checkBiometrics().then((bool result){
       setState(() {
         hasFingerPrint=result;
@@ -78,7 +102,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
   Future<String> createPost(String url) async {
     Map<String, String> headers = {"Content-type": "application/json"};
     print("Entered");
-    String req = '{"name":"'+nameController.text+'","age":"'+ageController.text+'","symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'","date":"20/01/2020"}';
+    String req = '{"name":"'+nameController.text+'","age":"'+ageController.text+'","symptoms":"'+symptomsController.text+'","diagnosis":"'+diagnosisController.text+'","prescription":"'+prescriptionController.text+'","advice":"'+remarksController.text+'","phno":"'+phoneNumberController.text+'","email":"'+emailController.text+'","date":"28/01/2020", "doctorAddress" : "$docAddress"}';
     print(req);
    http.post(url, headers: headers, body: req).then((http.Response response) {
     final int statusCode = response.statusCode;
@@ -94,15 +118,12 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
     }
     
   });
-}
-  void initialiseFromJSON(){
-    _name="Name";
-    _age="23";
-    _symptoms="Cough Cold";
-    _diagnosis="Fever";
-    _prescription="Dolo650 Crocin";
-    _remarks="remarks";
+} 
+  void showSuccessDialog(){
+    
   }
+  
+
   void initialiseControllers(){
     nameController=TextEditingController();
     ageController=TextEditingController();
@@ -336,11 +357,16 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
                   onPressed: null,
                 ),
                 RaisedButton(
-                  color: Colors.green,
+                  color: Colors.black,
                   child: Text("Send",style:TextStyle(color: Colors.white)),
-                  onPressed:() async=> {
-                    print("object"),
-                    await createPost('http://c68ee564.ngrok.io/api/patient/create')
+                  onPressed:() async{
+                    print("object");
+                    await createPost('$ngrok_url/api/patient/create');
+                    showDialog(
+                      context: context,
+                      builder: (_) {
+                        return ShowSuccessDialog();
+                      });
                   }
                 )
 
@@ -354,7 +380,7 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 RaisedButton(
-                  color: Colors.green,
+                  color: HexColor('#00324B'),
                   child: Text("Send",style:TextStyle(color: Colors.white)),
                   onPressed:()=> print("object"),
                 )
@@ -365,6 +391,79 @@ class _GeneralDisplayReportTabState extends State<GeneralDisplayReportTab> {
       ),
     ) ,
     );
+
+
       
+  }
+}
+
+class ShowSuccessDialog extends StatefulWidget {
+  @override
+  _ShowSuccessDialogState createState() => _ShowSuccessDialogState();
+}
+
+class _ShowSuccessDialogState extends State<ShowSuccessDialog> with TickerProviderStateMixin {
+  LottieComposition _composition;
+  AnimationController _controller;
+
+    Future<LottieComposition> loadAsset(String assetName) async {
+      return await rootBundle
+      .loadString(assetName)
+      .then<Map<String, dynamic>>((String data) => json.decode(data))
+      .then((Map<String, dynamic> map) =>  LottieComposition.fromMap(map));
+}
+    @override
+    void initState() { 
+      super.initState();
+        _controller =  AnimationController(
+        duration: const Duration(seconds: 2),
+        vsync: this,
+        );
+        loadAsset("assets/send_successful.json").then((LottieComposition composition) {
+          setState(() {
+            _composition = composition;
+            _controller.reset();
+            _controller.forward();
+            _controller.duration=Duration(seconds: 2);
+          });
+        });
+        _controller.addListener(() => setState(() {}));
+    }
+  @override
+  Widget build(BuildContext context) {
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     // return object of type Dialog
+        
+          return AlertDialog(
+          contentPadding: EdgeInsets.all(0.0),
+          title: new Center(child: Text("Sent Successfully")),
+          content: Builder(
+            builder: (BuildContext context){
+            return  Container(
+            width: 400 ,
+            child: Lottie(
+              composition: _composition,
+              controller: _controller,
+              size: const Size(300,200),
+            ),
+          );
+            },
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder:(context)=>HomeTab())
+                );
+              },
+            ),
+          ],
+
+        );
+        //   },
+        // );
   }
 }

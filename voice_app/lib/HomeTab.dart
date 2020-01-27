@@ -5,8 +5,23 @@ import 'package:flutter/services.dart';
 import 'package:voice_app/NewPrescriptionTab.dart';
 import 'package:voice_app/ScanQRTab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:voice_app/url.dart';
 
-
+final MaterialColor primaryColorShades = MaterialColor(
+  0xFF000000,
+  <int, Color>{
+    50: Color(0xFFA4A4BF),
+    100: Color(0xFFA4A4BF),
+    200: Color(0xFFA4A4BF),
+    300: Color(0xFF9191B3),
+    400: Color(0xFF7F7FA6),
+    500: Color(0xFF181861),
+    600: Color(0xFF6D6D99),
+    700: Color(0xFF5B5B8D),
+    800: Color(0xFF494980),
+    900: Color(0xFF181861),
+  },
+);
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
@@ -21,28 +36,15 @@ class HexColor extends Color {
 }
 
 class HomeTab extends StatelessWidget {
-  final MaterialColor primaryColorShades = MaterialColor(
-  0xFF00324B,
-  <int, Color>{
-    50: Color(0xFFA4A4BF),
-    100: Color(0xFFA4A4BF),
-    200: Color(0xFFA4A4BF),
-    300: Color(0xFF9191B3),
-    400: Color(0xFF7F7FA6),
-    500: Color(0xFF181861),
-    600: Color(0xFF6D6D99),
-    700: Color(0xFF5B5B8D),
-    800: Color(0xFF494980),
-    900: Color(0xFF181861),
-  },
-);
+  
   
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
+      theme: 
+      ThemeData(
         primarySwatch: primaryColorShades
       ),
       home: VoiceHome(),
@@ -85,8 +87,7 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
     if(sharedPreferences.containsKey("address")){
       sharedPreferences.remove("address");
     }
-    // print(sharedPreferences.getString("address"));
-    
+    // print(sharedPreferences.getString("address"));    
     // print(sharedPreferences.getString("address"));
 
   }
@@ -95,27 +96,34 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
     return Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text("Voice Prescription"),
+        title: new Text("SCRIBE +",
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 8,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w200
+                    ),                    
+                  ),
         centerTitle: true,
         elevation: defaultTargetPlatform == TargetPlatform.android? 5.0: 0.0 ,
       ),
       drawer: new Drawer(
         child: new ListView(
           children: <Widget>[
-            new UserAccountsDrawerHeader(
-                accountName: new Text("Harshana"),
-                accountEmail: new Text("hana.8500@gmail.com"),
-                decoration: new BoxDecoration(
-                  color: Colors.green
-                ),
-                arrowColor: Colors.white,
-                currentAccountPicture: new CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: new Text("H",style: new TextStyle(
-                    fontSize: 40.0
-                  ),),
-                ),
-                ),
+            // new UserAccountsDrawerHeader(
+            //     accountName: new Text("Harshana"),
+            //     accountEmail: new Text("hana.8500@gmail.com"),
+            //     decoration: new BoxDecoration(
+            //       color: Colors.green
+            //     ),
+            //     arrowColor: Colors.white,
+            //     currentAccountPicture: new CircleAvatar(
+            //       backgroundColor: Colors.white,
+            //       child: new Text("H",style: new TextStyle(
+            //         fontSize: 40.0
+            //       ),),
+            //     ),
+            //     ),
             new ListTile(
               title: new Text("Home"),
               trailing: new Icon(Icons.home),
@@ -129,7 +137,7 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
               trailing: new Icon(Icons.attach_money),
             ),
             new Divider(
-              height: 60.0,
+              height: 100.0,
             ),
             new ListTile(
               title: new Text("Log out"),
@@ -150,11 +158,11 @@ class _VoiceHomeState extends State<VoiceHome> with SingleTickerProviderStateMix
         currentIndex: currentTabIndex,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.add),
+              icon: Icon(Icons.person_add),
               title: new Text("New Patient")
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.camera),
+              icon: Icon(Icons.contacts),
               title: new Text("Existing Patient")
             )
           ],

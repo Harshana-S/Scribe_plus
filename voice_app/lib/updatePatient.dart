@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:voice_app/HomeTab.dart';
+import 'package:voice_app/url.dart';
+
 class UpdatePatient extends StatefulWidget {
   final String patientAddress, doctorAddress;
   UpdatePatient({Key key,@required this.patientAddress,@required this.doctorAddress }) : super(key: key);
@@ -82,9 +85,9 @@ class _UpdatePatientState extends State<UpdatePatient> {
     map["email"] = "aparna.k799@gmail.com";
     return map;
   }
-  Future<String> createPost(String url) async {
+  Future createPost(String url) async {
     Map<String, String> headers = {"Content-type": "application/json"};
-    String req = '{"patientAddress" : "$patientAddress",	"prescription" : "'+prescriptionController.text+'",'+' "advice" : "'+remarksController.text+'", "symptoms" : "'+symptomsController.text+'", "diagnosis" :"'+ diagnosisController.text+'", 	"doctorAddress" : "$doctorAddress", "date"  : "20/01/2020"}';
+    String req = '{"patientAddress" : "$patientAddress",	"prescription" : "'+prescriptionController.text+'",'+' "advice" : "'+remarksController.text+'", "symptoms" : "'+symptomsController.text+'", "diagnosis" :"'+ diagnosisController.text+'", 	"doctorAddress" : "$doctorAddress", "date"  : "28/01/2020"}';
     print(req);
    http.post(url, headers: headers, body: req).then((http.Response response) {
     final int statusCode = response.statusCode;
@@ -120,7 +123,13 @@ class _UpdatePatientState extends State<UpdatePatient> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Report'),
+        title: Text('ADD PRESCRIPTION',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 2
+        )),
         centerTitle: true,
       ),
       body: Container(
@@ -128,23 +137,6 @@ class _UpdatePatientState extends State<UpdatePatient> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[             
-              
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-               
-               
-                
-                             
-              ],
-            ),
-            )
-            ,
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.01,
             ),
@@ -260,11 +252,11 @@ class _UpdatePatientState extends State<UpdatePatient> {
                   onPressed: null,
                 ),
                 RaisedButton(
-                  color: Colors.green,
+                  color: HexColor('#00324B'),
                   child: Text("Send",style:TextStyle(color: Colors.white)),
                   onPressed:() async=> {
                     print("object"),
-                    await createPost('http://c68ee564.ngrok.io/api/patient/update')
+                    await createPost('$ngrok_url/api/patient/update')
                   }
                 )
 
@@ -278,7 +270,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 RaisedButton(
-                  color: Colors.green,
+                  color: HexColor('#00324B'),
                   child: Text("Send",style:TextStyle(color: Colors.white)),
                   onPressed:()=> print("object"),
                 )

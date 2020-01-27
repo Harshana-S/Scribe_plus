@@ -1,7 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:voice_app/DisplayPatientPage.dart';
 import 'package:voice_app/DoctorLoginPage.dart';
-void main() => runApp(SplashTab());
+import 'package:voice_app/GeneralDisplayReportTab.dart';
+import 'package:voice_app/HomeTab.dart';
+import 'package:voice_app/SentSuccessful.dart';
+import 'package:voice_app/updatePatient.dart';
+
+// void main() => runApp(SplashTab());
+void main()=>runApp(SplashTab());
 
 class SplashTab extends StatelessWidget {
   @override
@@ -14,58 +21,14 @@ class SplashTab extends StatelessWidget {
       // },
       title: 'Scribe+',
       theme: ThemeData(
-        primarySwatch: Colors.green
+        primarySwatch: primaryColorShades
       ),
-      home: LoginTab(),
-    );
-  }
-}
-
-class LoginTab extends StatefulWidget {
- 
-  _LoginTabState createState() => _LoginTabState();
-  
-}
-
-class _LoginTabState extends State<LoginTab> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  startTime() async {
-    var _duration = new Duration(seconds: 2);
-    return new Timer(_duration, navigationPage);
-  }
-  void navigationPage() { //landing screen replace with splash screen.
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-        builder:(context) => DoctorLoginPage(),
-    ),
-  (Route<dynamic> route) => false,);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    startTime();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      body: Container(
-        color: Colors.white,
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Text("scribe +", style: TextStyle(
-            color: Colors.green,
-            fontWeight: FontWeight.w900,
-            fontSize: 60.0,
-            letterSpacing: 2),)
-        ],
-      ),
-      )
-        
+      home: DoctorLoginPage(),
+      //UpdatePatient(patientAddress: "Patient",doctorAddress: "DOcotr",)
+      //DisplayPatientPage(patientAddress: "String",)
+      //HomeTab()
+      //SentSuccessful()
+      //GeneralDisplayReportTab(name: "this.name",age: "this.age",medicines: "medicines",symptoms: "symptoms",diagnosis: "diagnosis")
     );
   }
 }

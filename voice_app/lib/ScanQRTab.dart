@@ -8,12 +8,17 @@ import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:voice_app/DisplayPatientPage.dart';
 import 'package:http/http.dart' as http;
+import 'package:voice_app/url.dart';
+
+
+
 
 class ScanQRTab extends StatefulWidget {
   _ScanQRTab createState() => _ScanQRTab();
 }
 
 class _ScanQRTab extends State<ScanQRTab> {
+  
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   
   String barcode = '';
@@ -44,7 +49,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   }
 
    Future<String> verifyOTP(String patAddress,String otp) async {
-    String url = 'http://c68ee564.ngrok.io/api/patient/verifyOtp/'+patAddress+'/'+otp+'/$docKey';
+    String url = '$ngrok_url/api/patient/verifyOtp/'+patAddress+'/'+otp+'/$docKey';
     print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
@@ -62,7 +67,7 @@ class _ScanQRTab extends State<ScanQRTab> {
     }
   }
   Future<String> getPatient(String patAddress) async {
-    String url = 'http://c68ee564.ngrok.io/api/patient/get/'+patAddress+'/'+docAddress+'/$docKey';
+    String url = '$ngrok_url/api/patient/get/'+patAddress+'/'+docAddress+'/$docKey';
     print(url);
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
@@ -78,7 +83,7 @@ class _ScanQRTab extends State<ScanQRTab> {
   }
 
   Future sendOTP() async {
-    String url = 'http://c68ee564.ngrok.io/api/patient/sendOTP/$barcode';
+    String url = '$ngrok_url/api/patient/sendOTP/$barcode';
     print('Send OTP:$url');
     final response =
         await http.get(url, headers: {"Accept": "application/json"});
@@ -163,7 +168,7 @@ class _ScanQRTab extends State<ScanQRTab> {
                 verifyOTP(this.barcode, otp).then((String result){
                   if(result=='true'){
                 Navigator.of(context).pop();
-                Navigator.of(_scaffoldKey.currentContext).pushReplacement(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
                   }
                   else{
                 Navigator.of(context).pop();
@@ -189,27 +194,17 @@ class _ScanQRTab extends State<ScanQRTab> {
     );
   }
   void goToPatientsPage(){
-    Navigator.push(context, MaterialPageRoute(
-              builder: (context)=>DisplayPatientPage(patientAddress:barcode)
-            ));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>DisplayPatientPage(patientAddress:barcode)));
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("Scan QR Code",
-        style: TextStyle(
-          color: Colors.blueGrey
-        )),
-        centerTitle: true,
-        backgroundColor: Colors.grey[100],
-      ),
       body: Center(
         child: Container(
           child: SpinKitWave(
-            color: Colors.green,
+            color: Colors.black,
           ),
         )
       ));
